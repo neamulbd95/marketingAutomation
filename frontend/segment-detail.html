@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Segment — MarketFlow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 900:'#0f1f3d', 800:'#1E3A5F', 700:'#2a4d7a' },
+            brand: { DEFAULT:'#2563EB', light:'#EFF6FF', hover:'#1D4ED8' }
+          },
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/segment.css" />
+  <link rel="stylesheet" href="css/detail.css" />
+</head>
+<body class="font-sans text-slate-800 antialiased">
+
+<div class="app-wrap">
+
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-logo-icon"><i class="fa-solid fa-rocket"></i></div>
+      <span class="header-brand-name">MarketFlow</span>
+    </div>
+    <div class="header-right">
+      <div class="header-user-avatar" title="Alex Kim — Administrator">AK</div>
+    </div>
+  </header>
+
+  <main class="app-content">
+    <div class="detail-content">
+
+      <div class="detail-header">
+        <button class="back-btn" onclick="location.href='index.html'"><i class="fa-solid fa-chevron-left"></i>Segments</button>
+        <div class="detail-title-group">
+          <h1 class="detail-title" id="seg-detail-name">—</h1>
+          <div class="detail-badges" id="seg-detail-badges"></div>
+        </div>
+        <div class="detail-header-actions">
+          <button class="btn-danger-soft" onclick="deleteSegmentFromDetail()"><i class="fa-solid fa-trash mr-1.5"></i>Delete</button>
+          <button class="btn-primary" onclick="saveSegmentDetail()"><i class="fa-solid fa-check mr-1.5"></i>Save Changes</button>
+        </div>
+      </div>
+
+      <div class="detail-tabs-bar">
+        <button class="detail-tab active" data-dtab="seg-overview">Overview</button>
+        <button class="detail-tab" data-dtab="seg-customers">Customers</button>
+      </div>
+
+      <!-- Overview -->
+      <div class="detail-tab-pane active" id="dtab-seg-overview">
+        <div class="detail-two-col">
+          <div class="detail-card">
+            <div class="detail-card-title">Segment Details</div>
+            <input type="hidden" id="seg-detail-id" />
+            <div class="detail-form-grid">
+              <div class="detail-form-field span-2"><label class="detail-label">Segment Name</label><input type="text" class="form-input" id="sdf-name" /></div>
+              <div class="detail-form-field"><label class="detail-label">Type</label><select class="form-select" id="sdf-type"><option>Static</option><option>Dynamic</option><option>Behavioral</option><option>Predictive</option><option>Lookalike</option></select></div>
+              <div class="detail-form-field"><label class="detail-label">Estimated Count</label><input type="number" class="form-input" id="sdf-count" /></div>
+              <div class="detail-form-field span-2"><label class="detail-label">Filter Criteria</label><input type="text" class="form-input font-mono text-sm" id="sdf-filter" placeholder="e.g. plan = 'premium' AND age > 25" /></div>
+              <div class="detail-form-field span-2"><label class="detail-label">Folder</label><select class="form-select" id="sdf-folder"><option value="">Unassigned</option></select></div>
+            </div>
+          </div>
+          <div class="detail-card" style="align-self:start">
+            <div class="detail-card-title">Segment Info</div>
+            <div class="detail-info-list" id="seg-detail-info"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customers -->
+      <div class="detail-tab-pane hidden" id="dtab-seg-customers">
+        <div class="detail-card">
+          <div class="flex items-center justify-between mb-4">
+            <div class="detail-card-title mb-0">Matching Customers</div>
+            <div class="flex items-center gap-3">
+              <div class="search-box"><i class="fa-solid fa-search search-icon"></i><input type="text" class="search-input" id="seg-cust-search" placeholder="Search…" /></div>
+              <span class="result-info" id="seg-cust-info"></span>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="seg-cust-table">
+              <thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Age</th><th>City, Country</th><th class="th-sortable" data-col="totalSpend">Spend <i class="fa-solid fa-sort sort-icon"></i></th><th class="th-sortable" data-col="lastActivityDate">Last Active <i class="fa-solid fa-sort sort-icon"></i></th><th>Status</th></tr></thead>
+              <tbody id="seg-cust-tbody"><tr><td colspan="8" class="table-empty"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="seg-cust-pagination"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay hidden" id="confirm-modal-overlay">
+  <div class="modal modal-sm"><div class="modal-header"><h3 class="modal-title"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Confirm</h3><button class="modal-close" onclick="closeConfirmModal()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body"><p class="text-slate-600 text-sm" id="confirm-modal-msg"></p></div>
+  <div class="modal-footer"><button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button><button class="btn-danger-solid" id="confirm-modal-ok">Confirm</button></div></div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/common.js"></script>
+<script src="js/segment-detail.js"></script>
+</body>
+</html>

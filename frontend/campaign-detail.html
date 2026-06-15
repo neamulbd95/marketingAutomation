@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campaign — MarketFlow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 900:'#0f1f3d', 800:'#1E3A5F', 700:'#2a4d7a' },
+            brand: { DEFAULT:'#2563EB', light:'#EFF6FF', hover:'#1D4ED8' }
+          },
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/campaign.css" />
+  <link rel="stylesheet" href="css/detail.css" />
+  <link rel="stylesheet" href="css/email-designer.css" />
+</head>
+<body class="font-sans text-slate-800 antialiased">
+
+<div class="app-wrap">
+
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-logo-icon"><i class="fa-solid fa-rocket"></i></div>
+      <span class="header-brand-name">MarketFlow</span>
+    </div>
+    <div class="header-right">
+      <div class="header-user-avatar" title="Alex Kim — Administrator">AK</div>
+    </div>
+  </header>
+
+  <main class="app-content">
+    <div class="detail-content">
+
+      <div class="detail-header">
+        <button class="back-btn" onclick="location.href='index.html'"><i class="fa-solid fa-chevron-left"></i>Campaigns</button>
+        <div class="detail-title-group">
+          <h1 class="detail-title" id="camp-detail-name">—</h1>
+          <div class="detail-badges" id="camp-detail-badges"></div>
+        </div>
+        <div class="detail-header-actions">
+          <button class="btn-danger-soft" onclick="deleteCampaignFromDetail()"><i class="fa-solid fa-trash mr-1.5"></i>Delete</button>
+          <button class="btn-primary" onclick="saveCampaignDetail()"><i class="fa-solid fa-check mr-1.5"></i>Save Changes</button>
+        </div>
+      </div>
+
+      <div class="detail-tabs-bar">
+        <button class="detail-tab active" data-dtab="camp-overview">Overview</button>
+        <button class="detail-tab" data-dtab="camp-audience">Audience</button>
+        <button class="detail-tab" data-dtab="camp-email">Email Content</button>
+      </div>
+
+      <!-- Overview tab -->
+      <div class="detail-tab-pane active" id="dtab-camp-overview">
+        <div class="detail-two-col">
+          <div class="detail-card">
+            <div class="detail-card-title">Campaign Details</div>
+            <input type="hidden" id="camp-detail-id" />
+            <div class="detail-form-grid">
+              <div class="detail-form-field span-2"><label class="detail-label">Campaign Name</label><input type="text" class="form-input" id="cdf-name" /></div>
+              <div class="detail-form-field"><label class="detail-label">Type</label><select class="form-select" id="cdf-type"><option>Email</option><option>SMS</option><option>Push Notification</option><option>Social</option><option>Multi-channel</option></select></div>
+              <div class="detail-form-field"><label class="detail-label">Status</label><select class="form-select" id="cdf-status"><option>Draft</option><option>Scheduled</option><option>Active</option><option>Paused</option><option>Completed</option><option>Archived</option></select></div>
+              <div class="detail-form-field"><label class="detail-label">Start Date</label><input type="date" class="form-input" id="cdf-start-date" /></div>
+              <div class="detail-form-field"><label class="detail-label">End Date</label><input type="date" class="form-input" id="cdf-end-date" /></div>
+              <div class="detail-form-field span-2"><label class="detail-label">Folder</label><select class="form-select" id="cdf-folder"><option value="">Unassigned</option></select></div>
+            </div>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Campaign Info</div>
+            <div class="detail-info-list" id="camp-detail-info"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audience tab -->
+      <div class="detail-tab-pane hidden" id="dtab-camp-audience">
+        <div class="detail-two-col">
+          <div class="detail-card">
+            <div class="detail-card-title">Attached Segment</div>
+            <div id="camp-segment-area"></div>
+          </div>
+          <div class="detail-card" style="align-self:start">
+            <div class="detail-card-title">Segment Stats</div>
+            <div id="camp-segment-stats" class="detail-info-list"></div>
+          </div>
+        </div>
+        <div class="detail-card mt-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="detail-card-title mb-0">Eligible Customers</div>
+            <div class="flex items-center gap-3">
+              <div class="search-box"><i class="fa-solid fa-search search-icon"></i><input type="text" class="search-input" id="cust-search" placeholder="Search customers…" /></div>
+              <span class="result-info" id="cust-result-info"></span>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="cust-table">
+              <thead>
+                <tr>
+                  <th>Name</th><th>Email</th><th>Plan</th><th>Age</th><th>City</th>
+                  <th class="th-sortable" data-col="totalSpend">Spend <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th class="th-sortable" data-col="lastActivityDate">Last Active <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="cust-tbody"><tr><td colspan="8" class="table-empty"><div class="no-data-msg"><i class="fa-solid fa-user-slash"></i><p>Attach a segment to see customers</p></div></td></tr></tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="cust-pagination"></div>
+        </div>
+      </div>
+
+      <!-- Email Content tab -->
+      <div class="detail-tab-pane hidden" id="dtab-camp-email">
+        <div class="detail-card">
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <div class="detail-card-title mb-1">Email Content</div>
+              <p class="text-sm text-slate-500">Design your campaign email using the drag-and-drop builder or load from a saved template.</p>
+            </div>
+            <div class="flex gap-3">
+              <button class="btn-secondary" onclick="loadTemplateForCampaign()"><i class="fa-solid fa-file-import mr-1.5"></i>Load Template</button>
+              <button class="btn-primary" onclick="openEmailDesigner()"><i class="fa-solid fa-pencil-ruler mr-1.5"></i>Open Designer</button>
+            </div>
+          </div>
+          <div class="email-preview-container" id="camp-email-preview">
+            <div class="email-empty-state">
+              <i class="fa-regular fa-envelope text-4xl text-slate-300"></i>
+              <p class="text-slate-500 mt-3 font-medium">No email designed yet</p>
+              <p class="text-slate-400 text-sm mt-1">Click "Open Designer" to create your campaign email</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ══════════ EMAIL DESIGNER OVERLAY ══════════ -->
+<div class="designer-overlay hidden" id="designer-overlay">
+  <div class="designer-shell">
+    <header class="designer-topbar">
+      <div class="designer-topbar-left">
+        <button class="designer-close-btn" onclick="closeEmailDesigner()"><i class="fa-solid fa-xmark"></i></button>
+        <span class="designer-title">Email Designer</span>
+        <span class="designer-for" id="designer-for-label"></span>
+      </div>
+      <div class="designer-topbar-center">
+        <button class="designer-view-btn active" onclick="setDesignerView('desktop')"><i class="fa-solid fa-desktop"></i></button>
+        <button class="designer-view-btn" onclick="setDesignerView('mobile')"><i class="fa-solid fa-mobile-screen"></i></button>
+      </div>
+      <div class="designer-topbar-right">
+        <button class="btn-secondary btn-sm" onclick="undoDesigner()" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
+        <button class="btn-secondary btn-sm" onclick="redoDesigner()" title="Redo"><i class="fa-solid fa-rotate-right"></i></button>
+        <button class="btn-secondary btn-sm" onclick="previewDesign()"><i class="fa-solid fa-eye mr-1"></i>Preview</button>
+        <button class="btn-primary btn-sm" onclick="saveDesign()"><i class="fa-solid fa-check mr-1"></i>Save &amp; Close</button>
+      </div>
+    </header>
+    <div class="designer-body">
+      <aside class="designer-blocks-panel">
+        <div class="designer-panel-title">Content Blocks</div>
+        <div class="designer-blocks-list">
+          <div class="block-item" draggable="true" data-block="header"><div class="block-icon"><i class="fa-solid fa-heading"></i></div><span>Header</span></div>
+          <div class="block-item" draggable="true" data-block="text"><div class="block-icon"><i class="fa-solid fa-align-left"></i></div><span>Text</span></div>
+          <div class="block-item" draggable="true" data-block="image"><div class="block-icon"><i class="fa-regular fa-image"></i></div><span>Image</span></div>
+          <div class="block-item" draggable="true" data-block="button"><div class="block-icon"><i class="fa-solid fa-hand-pointer"></i></div><span>Button</span></div>
+          <div class="block-item" draggable="true" data-block="columns"><div class="block-icon"><i class="fa-solid fa-table-columns"></i></div><span>2 Columns</span></div>
+          <div class="block-item" draggable="true" data-block="divider"><div class="block-icon"><i class="fa-solid fa-minus"></i></div><span>Divider</span></div>
+          <div class="block-item" draggable="true" data-block="spacer"><div class="block-icon"><i class="fa-solid fa-arrows-up-down"></i></div><span>Spacer</span></div>
+          <div class="block-item" draggable="true" data-block="social"><div class="block-icon"><i class="fa-solid fa-share-nodes"></i></div><span>Social</span></div>
+          <div class="block-item" draggable="true" data-block="footer"><div class="block-icon"><i class="fa-solid fa-copyright"></i></div><span>Footer</span></div>
+        </div>
+        <div class="designer-panel-title mt-4">Saved Templates</div>
+        <div id="designer-templates-list" class="designer-templates-list"></div>
+      </aside>
+      <div class="designer-canvas-area" id="designer-canvas-area">
+        <div class="designer-canvas" id="designer-canvas">
+          <div class="designer-drop-hint" id="designer-drop-hint">
+            <i class="fa-solid fa-plus-circle text-3xl text-slate-300"></i>
+            <p class="text-slate-400 mt-2 text-sm">Drag blocks here to build your email</p>
+          </div>
+        </div>
+      </div>
+      <aside class="designer-props-panel" id="designer-props-panel">
+        <div class="designer-panel-title">Properties</div>
+        <div id="designer-props-content">
+          <div class="designer-props-empty"><i class="fa-regular fa-hand-pointer text-2xl text-slate-200"></i><p class="text-slate-400 text-sm mt-2">Select a block to edit</p></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- Segment Selector Modal -->
+<div class="modal-overlay hidden" id="seg-select-modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3 class="modal-title">Select Segment</h3><button class="modal-close" onclick="$('#seg-select-modal-overlay').addClass('hidden')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <div class="search-box mb-4"><i class="fa-solid fa-search search-icon"></i><input type="text" class="search-input" id="seg-select-search" placeholder="Search segments…" style="width:100%" /></div>
+      <div class="seg-select-list" id="seg-select-list" style="max-height:340px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Template Selector Modal -->
+<div class="modal-overlay hidden" id="tmpl-select-modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3 class="modal-title">Load Email Template</h3><button class="modal-close" onclick="$('#tmpl-select-modal-overlay').addClass('hidden')"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body">
+      <p class="text-sm text-slate-500 mb-4">Select a template to load into the email designer. This will replace the current design.</p>
+      <div class="tmpl-select-list" id="tmpl-select-list" style="max-height:380px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay hidden" id="confirm-modal-overlay">
+  <div class="modal modal-sm"><div class="modal-header"><h3 class="modal-title"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Confirm</h3><button class="modal-close" onclick="closeConfirmModal()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body"><p class="text-slate-600 text-sm" id="confirm-modal-msg"></p></div>
+  <div class="modal-footer"><button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button><button class="btn-danger-solid" id="confirm-modal-ok">Confirm</button></div></div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/common.js"></script>
+<script src="js/campaign-detail.js"></script>
+<script src="js/email-designer.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+/* ══════════════════════════════════════════
+   campaign.css — Campaign tab styles
+   ══════════════════════════════════════════ */
+
+#tab-campaign .data-table td:nth-child(2) {
+  font-weight: 600;
+  color: #0f172a;
+  max-width: 220px;
+}
+#tab-campaign .data-table td:nth-child(2) a {
+  color: var(--navy-800);
+  text-decoration: none;
+}
+#tab-campaign .data-table td:nth-child(2) a:hover {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+.campaign-name-cell {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.campaign-name-text {
+  font-weight: 600; color: #0f172a; font-size: 13.5px;
+}
+.campaign-folder-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; color: #94a3b8;
+}
+.campaign-folder-tag i { font-size: 10px; }

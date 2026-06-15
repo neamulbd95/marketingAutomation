@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\MarketingAutomation.API.props" />
+</Project>

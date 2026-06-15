@@ -1,0 +1,55 @@
+/* ══════════════════════════════════════════
+   email-template.css — Email Template tab styles
+   ══════════════════════════════════════════ */
+
+#tab-emailtemplate .card {
+  overflow: visible;
+}
+
+.et-name-cell {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.et-name-text {
+  font-weight: 600; color: #0f172a; font-size: 13.5px;
+}
+.et-subject-text {
+  font-size: 12px; color: #64748b;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 260px;
+}
+
+.et-category-badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 6px;
+  font-size: 11.5px; font-weight: 600;
+}
+.et-cat-promotional  { background: #fef3c7; color: #92400e; }
+.et-cat-transactional{ background: #e0f2fe; color: #0369a1; }
+.et-cat-newsletter   { background: #f3e8ff; color: #7e22ce; }
+.et-cat-welcome      { background: #f0fdf4; color: #15803d; }
+.et-cat-drip         { background: #eff6ff; color: #1e40af; }
+.et-cat-notification { background: #fdf4ff; color: #9333ea; }
+.et-cat-reminder     { background: #fff7ed; color: #c2410c; }
+.et-cat-survey       { background: #f1f5f9; color: #475569; }
+.et-cat-re-engagement{ background: #fef9c3; color: #a16207; }
+.et-cat-announcement { background: #e0f2fe; color: #075985; }
+
+/* ── Row preview button ── */
+.td-action { width: 52px; text-align: center; }
+.btn-row-preview {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 7px; border: 1px solid #e2e8f0;
+  background: #f8fafc; color: #64748b;
+  font-size: 13px; cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+  opacity: 0;
+}
+.data-table tbody tr:hover .btn-row-preview { opacity: 1; }
+.btn-row-preview:hover { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+
+/* ── Email Template preview modal ── */
+.modal-preview {
+  width: 860px; max-width: 95vw;
+}
+.et-preview-modal-frame {
+  display: block; width: 100%; height: 580px; border: none; background: #fff;
+}

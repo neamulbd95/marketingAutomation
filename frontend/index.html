@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MarketFlow — Marketing Automation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 900:'#0f1f3d', 800:'#1E3A5F', 700:'#2a4d7a' },
+            brand: { DEFAULT:'#2563EB', light:'#EFF6FF', hover:'#1D4ED8' }
+          },
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/common.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/campaign.css" />
+  <link rel="stylesheet" href="css/segment.css" />
+  <link rel="stylesheet" href="css/email-template.css" />
+  <link rel="stylesheet" href="css/settings.css" />
+  <link rel="stylesheet" href="css/detail.css" />
+</head>
+<body class="font-sans text-slate-800 antialiased">
+
+<div class="app-wrap">
+
+  <!-- ══ HEADER / TAB NAV ══ -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-logo-icon"><i class="fa-solid fa-rocket"></i></div>
+      <span class="header-brand-name">MarketFlow</span>
+    </div>
+
+    <nav class="header-nav">
+      <button class="tab-item active" data-section="dashboard">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Dashboard</span>
+      </button>
+      <button class="tab-item" data-section="campaigns">
+        <i class="fa-solid fa-bullhorn"></i>
+        <span>Campaigns</span>
+        <span class="tab-badge hidden" id="sb-camp-count"></span>
+      </button>
+      <button class="tab-item" data-section="segments">
+        <i class="fa-solid fa-users-viewfinder"></i>
+        <span>Segments</span>
+        <span class="tab-badge hidden" id="sb-seg-count"></span>
+      </button>
+      <button class="tab-item" data-section="emailtemplates">
+        <i class="fa-solid fa-envelope-open-text"></i>
+        <span>Email Templates</span>
+      </button>
+      <button class="tab-item" data-section="settings">
+        <i class="fa-solid fa-gear"></i>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <div class="header-right">
+      <div class="header-search">
+        <i class="fa-solid fa-search"></i>
+        <input type="text" placeholder="Quick search..." id="global-search" />
+      </div>
+      <button class="header-icon-btn" title="Notifications">
+        <i class="fa-solid fa-bell"></i>
+      </button>
+      <div class="header-user-avatar" title="Alex Kim — Administrator">AK</div>
+    </div>
+  </header>
+
+  <!-- ══ CONTENT ══ -->
+  <main class="app-content">
+
+      <!-- ═══ DASHBOARD ═══ -->
+      <section class="page-section active" id="section-dashboard">
+        <div class="page-title-bar">
+          <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Overview of your marketing performance</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <select class="form-select text-sm" id="dashDateRange">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+            <button class="btn-primary" onclick="refreshDashboard()"><i class="fa-solid fa-arrows-rotate mr-1.5"></i>Refresh</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+          <div class="stat-card"><div class="stat-icon si-blue"><i class="fa-solid fa-bullhorn"></i></div><div class="stat-body"><div class="stat-value" id="stat-campaigns">—</div><div class="stat-label">Total Campaigns</div></div><div class="stat-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i>12%</div></div>
+          <div class="stat-card"><div class="stat-icon si-green"><i class="fa-solid fa-circle-play"></i></div><div class="stat-body"><div class="stat-value" id="stat-active">—</div><div class="stat-label">Active</div></div><div class="stat-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i>8%</div></div>
+          <div class="stat-card"><div class="stat-icon si-purple"><i class="fa-solid fa-users-viewfinder"></i></div><div class="stat-body"><div class="stat-value" id="stat-segments">—</div><div class="stat-label">Segments</div></div><div class="stat-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i>5%</div></div>
+          <div class="stat-card"><div class="stat-icon si-amber"><i class="fa-solid fa-envelope-open-text"></i></div><div class="stat-body"><div class="stat-value" id="stat-templates">—</div><div class="stat-label">Templates</div></div><div class="stat-trend trend-neutral"><i class="fa-solid fa-minus"></i>0%</div></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+          <div class="card col-span-2">
+            <div class="card-header">
+              <h3 class="card-title">Campaign Performance</h3>
+              <div class="flex gap-2">
+                <button class="chart-tab active" data-metric="sent">Sent</button>
+                <button class="chart-tab" data-metric="opened">Opened</button>
+                <button class="chart-tab" data-metric="clicked">Clicked</button>
+              </div>
+            </div>
+            <div class="card-body"><canvas id="performanceChart" height="220"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">By Status</h3></div>
+            <div class="card-body flex flex-col items-center">
+              <canvas id="statusChart" width="190" height="190"></canvas>
+              <div id="donutLegend" class="donut-legend mt-4 w-full"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div class="card col-span-2">
+            <div class="card-header">
+              <h3 class="card-title">Campaign Calendar</h3>
+              <div class="flex items-center gap-2">
+                <button class="icon-btn" id="calPrev"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                <span class="font-semibold text-slate-700 min-w-32 text-center text-sm" id="calMonthLabel"></span>
+                <button class="icon-btn" id="calNext"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+              </div>
+            </div>
+            <div class="card-body p-0"><div class="calendar-grid" id="calendarGrid"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">Recent Activity</h3></div>
+            <div class="card-body p-0"><div class="activity-feed" id="activityFeed"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ CAMPAIGNS LIST ═══ -->
+      <section class="page-section hidden" id="section-campaigns">
+        <div class="page-title-bar">
+          <div>
+            <h1 class="page-title">Campaigns</h1>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="btn-danger-soft hidden" id="camp-bulk-delete-btn" onclick="campaignBulkDelete()">
+              <i class="fa-solid fa-trash mr-1.5"></i>Delete (<span id="camp-selected-count">0</span>)
+            </button>
+            <button class="btn-secondary hidden" id="camp-move-btn" onclick="showMoveCampaignModal()">
+              <i class="fa-solid fa-folder-open mr-1.5"></i>Move
+            </button>
+            <button class="btn-primary" onclick="showCampaignModal()"><i class="fa-solid fa-plus mr-1.5"></i>New Campaign</button>
+          </div>
+        </div>
+        <div class="folder-layout">
+          <aside class="folder-sidebar" id="camp-folder-sidebar">
+            <div class="folder-sidebar-header">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Folders</span>
+              <button class="icon-btn" title="New folder" onclick="showNewFolderModal('campaign')"><i class="fa-solid fa-folder-plus text-xs"></i></button>
+            </div>
+            <div class="folder-tree" id="camp-folder-tree"></div>
+          </aside>
+          <div class="data-panel">
+            <div class="table-toolbar">
+              <div class="table-toolbar-left">
+                <div class="search-box"><i class="fa-solid fa-search search-icon"></i><input type="text" class="search-input" id="camp-search" placeholder="Search campaigns…" /><button class="search-clear hidden" id="camp-search-clear"><i class="fa-solid fa-xmark"></i></button></div>
+                <button class="btn-filter" id="camp-filter-btn" onclick="toggleFilter('campaign')"><i class="fa-solid fa-sliders mr-1.5"></i>Filter<span class="filter-badge hidden" id="camp-filter-badge">0</span></button>
+              </div>
+              <div class="table-toolbar-right">
+                <span class="result-info" id="camp-result-info"></span>
+                <select class="form-select text-sm" id="camp-page-size"><option value="50" selected>50 / page</option><option value="100">100 / page</option><option value="150">150 / page</option></select>
+              </div>
+            </div>
+            <div class="filter-panel hidden" id="camp-filter-panel">
+              <div class="filter-grid">
+                <div class="filter-field"><label class="filter-label">Status</label><select class="form-select" id="camp-filter-status"><option value="">All Statuses</option><option>Draft</option><option>Scheduled</option><option>Active</option><option>Paused</option><option>Completed</option><option>Archived</option></select></div>
+                <div class="filter-field"><label class="filter-label">Type</label><select class="form-select" id="camp-filter-type"><option value="">All Types</option><option>Email</option><option>SMS</option><option>Push Notification</option><option>Social</option><option>Multi-channel</option></select></div>
+                <div class="filter-field"><label class="filter-label">Start From</label><input type="date" class="form-input" id="camp-filter-date-from" /></div>
+                <div class="filter-field"><label class="filter-label">Start To</label><input type="date" class="form-input" id="camp-filter-date-to" /></div>
+              </div>
+              <div class="filter-actions"><button class="btn-secondary" onclick="clearCampaignFilters()"><i class="fa-solid fa-eraser mr-1.5"></i>Clear</button><button class="btn-primary" onclick="applyCampaignFilters()"><i class="fa-solid fa-check mr-1.5"></i>Apply</button></div>
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table" id="camp-table">
+                <thead>
+                  <tr>
+                    <th class="th-check"><input type="checkbox" class="master-check" id="camp-master-check" /></th>
+                    <th class="th-sortable" data-col="name">Name <i class="fa-solid fa-sort sort-icon"></i></th>
+                    <th class="th-sortable" data-col="type">Type <i class="fa-solid fa-sort sort-icon"></i></th>
+                    <th class="th-sortable" data-col="status">Status <i class="fa-solid fa-sort sort-icon"></i></th>
+                    <th class="th-sortable" data-col="startDate">Start Date <i class="fa-solid fa-sort sort-icon"></i></th>
+                    <th class="th-sortable" data-col="endDate">End Date <i class="fa-solid fa-sort sort-icon"></i></th>
+                    <th>Created By</th>
+                  </tr>
+                </thead>
+                <tbody id="camp-tbody"><tr><td colspan="7" class="table-empty"><div class="spinner"></div></td></tr></tbody>
+              </table>
+            </div>
+            <div class="pagination-bar" id="camp-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ SEGMENTS LIST ═══ -->
+      <section class="page-section hidden" id="section-segments">
+        <div class="page-title-bar">
+          <div><h1 class="page-title">Segments</h1><p class="page-subtitle">Define and manage audience segments</p></div>
+          <div class="flex items-center gap-3">
+            <button class="btn-danger-soft hidden" id="seg-bulk-delete-btn" onclick="segmentBulkDelete()"><i class="fa-solid fa-trash mr-1.5"></i>Delete (<span id="seg-selected-count">0</span>)</button>
+            <button class="btn-secondary hidden" id="seg-move-btn" onclick="showMoveSegmentModal()"><i class="fa-solid fa-folder-open mr-1.5"></i>Move</button>
+            <button class="btn-primary" onclick="showSegmentModal()"><i class="fa-solid fa-plus mr-1.5"></i>New Segment</button>
+          </div>
+        </div>
+        <div class="folder-layout">
+          <aside class="folder-sidebar" id="seg-folder-sidebar">
+            <div class="folder-sidebar-header">
+              <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Folders</span>
+              <button class="icon-btn" title="New folder" onclick="showNewFolderModal('segment')"><i class="fa-solid fa-folder-plus text-xs"></i></button>
+            </div>
+            <div class="folder-tree" id="seg-folder-tree"></div>
+          </aside>
+          <div class="data-panel">
+            <div class="table-toolbar">
+              <div class="table-toolbar-left">
+                <div class="search-box"><i class="fa-solid fa-search search-icon"></i><input type="text" class="search-input" id="seg-search" placeholder="Search segments…" /><button class="search-clear hidden" id="seg-search-clear"><i class="fa-solid fa-xmark"></i></button></div>
+                <button class="btn-filter" id="seg-filter-btn" onclick="toggleFilter('segment')"><i class="fa-solid fa-sliders mr-1.5"></i>Filter<span class="filter-badge hidden" id="seg-filter-badge">0</span></button>
+              </div>
+              <div class="table-toolbar-right">
+                <span class="result-info" id="seg-result-info"></span>
+                <select class="form-select text-sm" id="seg-page-size"><option value="50" selected>50 / page</option><option value="100">100 / page</option><option value="150">150 / page</option></select>
+              </div>
+            </div>
+            <div class="filter-panel hidden" id="seg-filter-panel">
+              <div class="filter-grid">
+                <div class="filter-field"><label class="filter-label">Type</label><select class="form-select" id="seg-filter-type"><option value="">All Types</option><option>Static</option><option>Dynamic</option><option>Behavioral</option><option>Predictive</option><option>Lookalike</option></select></div>
+                <div class="filter-field"><label class="filter-label">Created From</label><input type="date" class="form-input" id="seg-filter-date-from" /></div>
+                <div class="filter-field"><label class="filter-label">Created To</label><input type="date" class="form-input" id="seg-filter-date-to" /></div>
+              </div>
+              <div class="filter-actions"><button class="btn-secondary" onclick="clearSegmentFilters()"><i class="fa-solid fa-eraser mr-1.5"></i>Clear</button><button class="btn-primary" onclick="applySegmentFilters()"><i class="fa-solid fa-check mr-1.5"></i>Apply</button></div>
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table" id="seg-table">
+                <thead><tr>
+                  <th class="th-check"><input type="checkbox" class="master-check" id="seg-master-check" /></th>
+                  <th class="th-sortable" data-col="name">Name <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th class="th-sortable" data-col="type">Type <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th>Filter Criteria</th>
+                  <th class="th-sortable" data-col="estimatedCount">Est. Size <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th class="th-sortable" data-col="createDate">Created <i class="fa-solid fa-sort sort-icon"></i></th>
+                  <th>Created By</th>
+                </tr></thead>
+                <tbody id="seg-tbody"><tr><td colspan="7" class="table-empty"><div class="spinner"></div></td></tr></tbody>
+              </table>
+            </div>
+            <div class="pagination-bar" id="seg-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ EMAIL TEMPLATES LIST ═══ -->
+      <section class="page-section hidden" id="section-emailtemplates">
+        <div class="page-title-bar">
+          <div><h1 class="page-title">Email Templates</h1><p class="page-subtitle">Create and manage reusable templates</p></div>
+          <div class="flex items-center gap-3">
+            <button class="btn-danger-soft hidden" id="et-bulk-delete-btn" onclick="etBulkDelete()"><i class="fa-solid fa-trash mr-1.5"></i>Delete (<span id="et-selected-count">0</span>)</button>
+            <button class="btn-primary" onclick="showEtModal()"><i class="fa-solid fa-plus mr-1.5"></i>New Template</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-toolbar">
+            <div class="table-toolbar-left">
+              <div class="search-box"><i class="fa-solid fa-search search-icon"></i><input type="text" class="search-input" id="et-search" placeholder="Search templates…" /><button class="search-clear hidden" id="et-search-clear"><i class="fa-solid fa-xmark"></i></button></div>
+              <button class="btn-filter" id="et-filter-btn" onclick="toggleFilter('emailtemplate')"><i class="fa-solid fa-sliders mr-1.5"></i>Filter<span class="filter-badge hidden" id="et-filter-badge">0</span></button>
+            </div>
+            <div class="table-toolbar-right">
+              <span class="result-info" id="et-result-info"></span>
+              <select class="form-select text-sm" id="et-page-size"><option value="50" selected>50 / page</option><option value="100">100 / page</option><option value="150">150 / page</option></select>
+            </div>
+          </div>
+          <div class="filter-panel hidden" id="et-filter-panel">
+            <div class="filter-grid">
+              <div class="filter-field"><label class="filter-label">Category</label><select class="form-select" id="et-filter-type"><option value="">All</option><option>Promotional</option><option>Transactional</option><option>Newsletter</option><option>Welcome</option><option>Drip</option><option>Notification</option><option>Reminder</option><option>Survey</option><option>Re-engagement</option><option>Announcement</option></select></div>
+              <div class="filter-field"><label class="filter-label">Created From</label><input type="date" class="form-input" id="et-filter-date-from" /></div>
+              <div class="filter-field"><label class="filter-label">Created To</label><input type="date" class="form-input" id="et-filter-date-to" /></div>
+            </div>
+            <div class="filter-actions"><button class="btn-secondary" onclick="clearEtFilters()"><i class="fa-solid fa-eraser mr-1.5"></i>Clear</button><button class="btn-primary" onclick="applyEtFilters()"><i class="fa-solid fa-check mr-1.5"></i>Apply</button></div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="et-table">
+              <thead><tr>
+                <th class="th-check"><input type="checkbox" class="master-check" id="et-master-check" /></th>
+                <th class="th-sortable" data-col="name">Template Name <i class="fa-solid fa-sort sort-icon"></i></th>
+                <th>Subject Line</th>
+                <th class="th-sortable" data-col="category">Category <i class="fa-solid fa-sort sort-icon"></i></th>
+                <th class="th-sortable" data-col="createDate">Created <i class="fa-solid fa-sort sort-icon"></i></th>
+                <th>Created By</th>
+                <th class="th-sortable" data-col="updatedDate">Updated <i class="fa-solid fa-sort sort-icon"></i></th>
+                <th style="width:60px"></th>
+              </tr></thead>
+              <tbody id="et-tbody"><tr><td colspan="8" class="table-empty"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="et-pagination"></div>
+        </div>
+      </section>
+
+      <!-- ═══ SETTINGS ═══ -->
+      <section class="page-section hidden" id="section-settings">
+        <div class="page-title-bar">
+          <div><h1 class="page-title">Settings</h1><p class="page-subtitle">Configure your marketing automation platform</p></div>
+          <button class="btn-primary" onclick="saveSettings()"><i class="fa-solid fa-floppy-disk mr-1.5"></i>Save Changes</button>
+        </div>
+        <div class="settings-layout">
+          <nav class="settings-nav">
+            <button class="settings-nav-item active" data-section="general"><i class="fa-solid fa-building"></i>General</button>
+            <button class="settings-nav-item" data-section="email"><i class="fa-solid fa-envelope"></i>Email / SMTP</button>
+            <button class="settings-nav-item" data-section="notifications"><i class="fa-solid fa-bell"></i>Notifications</button>
+            <button class="settings-nav-item" data-section="api"><i class="fa-solid fa-code"></i>API & Webhooks</button>
+            <button class="settings-nav-item" data-section="branding"><i class="fa-solid fa-palette"></i>Branding</button>
+            <button class="settings-nav-item" data-section="preferences"><i class="fa-solid fa-sliders"></i>Preferences</button>
+          </nav>
+          <div class="settings-content">
+            <section class="settings-section active" id="settings-general">
+              <div class="settings-section-header"><i class="fa-solid fa-building text-slate-600"></i><div><h2 class="settings-section-title">General Settings</h2><p class="settings-section-desc">Basic information about your organization</p></div></div>
+              <div class="settings-grid">
+                <div class="settings-field"><label class="settings-label">Company Name</label><input type="text" class="form-input" id="s-company-name" /></div>
+                <div class="settings-field"><label class="settings-label">Website URL</label><input type="url" class="form-input" id="s-website" /></div>
+                <div class="settings-field"><label class="settings-label">Timezone</label><select class="form-select" id="s-timezone"><option value="UTC">UTC</option><option value="America/New_York">Eastern (ET)</option><option value="America/Chicago">Central (CT)</option><option value="America/Denver">Mountain (MT)</option><option value="America/Los_Angeles">Pacific (PT)</option><option value="Europe/London">London (GMT)</option><option value="Europe/Paris">Paris (CET)</option><option value="Asia/Tokyo">Tokyo (JST)</option><option value="Asia/Singapore">Singapore (SGT)</option></select></div>
+                <div class="settings-field"><label class="settings-label">Language</label><select class="form-select" id="s-language"><option value="en-US">English (US)</option><option value="en-GB">English (UK)</option><option value="fr-FR">French</option><option value="de-DE">German</option><option value="es-ES">Spanish</option></select></div>
+                <div class="settings-field"><label class="settings-label">Date Format</label><select class="form-select" id="s-date-format"><option value="MM/DD/YYYY">MM/DD/YYYY</option><option value="DD/MM/YYYY">DD/MM/YYYY</option><option value="YYYY-MM-DD">YYYY-MM-DD</option></select></div>
+              </div>
+            </section>
+            <section class="settings-section hidden" id="settings-email">
+              <div class="settings-section-header"><i class="fa-solid fa-envelope text-slate-600"></i><div><h2 class="settings-section-title">Email / SMTP Settings</h2><p class="settings-section-desc">Configure outgoing email delivery</p></div></div>
+              <div class="settings-grid">
+                <div class="settings-field"><label class="settings-label">SMTP Host</label><input type="text" class="form-input" id="s-smtp-host" /></div>
+                <div class="settings-field"><label class="settings-label">SMTP Port</label><input type="number" class="form-input" id="s-smtp-port" /></div>
+                <div class="settings-field"><label class="settings-label">Username</label><input type="text" class="form-input" id="s-smtp-user" /></div>
+                <div class="settings-field"><label class="settings-label">Password</label><input type="password" class="form-input" id="s-smtp-pass" placeholder="••••••••" /></div>
+                <div class="settings-field"><label class="settings-label">From Name</label><input type="text" class="form-input" id="s-from-name" /></div>
+                <div class="settings-field"><label class="settings-label">From Email</label><input type="email" class="form-input" id="s-from-email" /></div>
+                <div class="settings-field"><label class="settings-label">Reply-To Email</label><input type="email" class="form-input" id="s-reply-to" /></div>
+                <div class="settings-field flex items-center gap-3 pt-6"><label class="toggle-switch"><input type="checkbox" id="s-ssl" /><span class="toggle-track"></span></label><div><div class="font-medium text-slate-700 text-sm">Enable SSL/TLS</div><div class="text-xs text-slate-500">Use secure SMTP connection</div></div></div>
+              </div>
+              <div class="mt-4"><button class="btn-secondary" onclick="sendTestEmail()"><i class="fa-solid fa-paper-plane mr-1.5"></i>Send Test Email</button></div>
+            </section>
+            <section class="settings-section hidden" id="settings-notifications">
+              <div class="settings-section-header"><i class="fa-solid fa-bell text-slate-600"></i><div><h2 class="settings-section-title">Notifications</h2><p class="settings-section-desc">Control when and how you receive alerts</p></div></div>
+              <div class="notif-list">
+                <div class="notif-item"><div class="notif-item-info"><div class="notif-item-title">Email Notifications</div><div class="notif-item-desc">Receive important alerts via email</div></div><label class="toggle-switch"><input type="checkbox" id="s-notif-email" /><span class="toggle-track"></span></label></div>
+                <div class="notif-item"><div class="notif-item-info"><div class="notif-item-title">Browser Notifications</div><div class="notif-item-desc">Show desktop push notifications</div></div><label class="toggle-switch"><input type="checkbox" id="s-notif-browser" /><span class="toggle-track"></span></label></div>
+                <div class="notif-item"><div class="notif-item-info"><div class="notif-item-title">Campaign Start Alert</div><div class="notif-item-desc">Notify when a campaign activates</div></div><label class="toggle-switch"><input type="checkbox" id="s-notif-start" /><span class="toggle-track"></span></label></div>
+                <div class="notif-item"><div class="notif-item-info"><div class="notif-item-title">Campaign End Alert</div><div class="notif-item-desc">Notify when a campaign completes</div></div><label class="toggle-switch"><input type="checkbox" id="s-notif-end" /><span class="toggle-track"></span></label></div>
+                <div class="notif-item"><div class="notif-item-info"><div class="notif-item-title">Weekly Report</div><div class="notif-item-desc">Receive a summary every Monday</div></div><label class="toggle-switch"><input type="checkbox" id="s-notif-weekly" /><span class="toggle-track"></span></label></div>
+              </div>
+            </section>
+            <section class="settings-section hidden" id="settings-api">
+              <div class="settings-section-header"><i class="fa-solid fa-code text-slate-600"></i><div><h2 class="settings-section-title">API & Webhooks</h2><p class="settings-section-desc">Manage API access and integrations</p></div></div>
+              <div class="settings-grid">
+                <div class="settings-field col-span-2"><label class="settings-label">API Key</label><div class="flex gap-2"><input type="text" class="form-input flex-1 font-mono text-sm" id="s-api-key" readonly /><button class="btn-secondary" onclick="copyApiKey()"><i class="fa-solid fa-copy mr-1"></i>Copy</button><button class="btn-secondary text-red-600" onclick="regenerateApiKey()"><i class="fa-solid fa-arrows-rotate mr-1"></i>Regenerate</button></div><p class="text-xs text-slate-400 mt-1">Keep this key secret.</p></div>
+                <div class="settings-field col-span-2"><label class="settings-label">Webhook URL</label><input type="url" class="form-input" id="s-webhook-url" /></div>
+                <div class="settings-field"><label class="settings-label">Rate Limit (req/min)</label><input type="number" class="form-input" id="s-rate-limit" /></div>
+              </div>
+            </section>
+            <section class="settings-section hidden" id="settings-branding">
+              <div class="settings-section-header"><i class="fa-solid fa-palette text-slate-600"></i><div><h2 class="settings-section-title">Branding</h2><p class="settings-section-desc">Customize platform appearance</p></div></div>
+              <div class="settings-grid">
+                <div class="settings-field"><label class="settings-label">Primary Color</label><div class="color-input-wrapper"><input type="color" class="color-picker" id="s-primary-color" /><input type="text" class="form-input flex-1" id="s-primary-color-text" /></div></div>
+                <div class="settings-field"><label class="settings-label">Accent Color</label><div class="color-input-wrapper"><input type="color" class="color-picker" id="s-accent-color" /><input type="text" class="form-input flex-1" id="s-accent-color-text" /></div></div>
+                <div class="settings-field col-span-2"><label class="settings-label">Company Logo</label><div class="logo-upload-area" onclick="$('#s-logo-file').click()"><i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-300 mb-2"></i><p class="text-sm text-slate-400">Click to upload · PNG, SVG · 2MB max</p><input type="file" class="hidden" id="s-logo-file" accept="image/*" /></div></div>
+              </div>
+              <div class="brand-preview mt-5"><p class="settings-label mb-2">Preview</p><div class="brand-preview-bar" id="brandPreviewBar"><div class="flex items-center gap-2"><div class="brand-preview-icon" id="brandPreviewIcon">M</div><span class="font-bold text-white text-sm" id="brandPreviewName">MarketFlow</span></div></div></div>
+            </section>
+            <section class="settings-section hidden" id="settings-preferences">
+              <div class="settings-section-header"><i class="fa-solid fa-sliders text-slate-600"></i><div><h2 class="settings-section-title">Preferences</h2><p class="settings-section-desc">Personalize your experience</p></div></div>
+              <div class="settings-grid">
+                <div class="settings-field"><label class="settings-label">Default Rows / Page</label><select class="form-select" id="s-pref-page-size"><option value="50">50</option><option value="100">100</option><option value="150">150</option></select></div>
+                <div class="settings-field"><label class="settings-label">Default View</label><select class="form-select" id="s-pref-view"><option value="list">List</option><option value="grid">Grid</option></select></div>
+                <div class="settings-field col-span-2"><label class="settings-label">Theme</label><div class="theme-selector"><button class="theme-opt active" data-theme="light" onclick="selectTheme('light')"><i class="fa-solid fa-sun"></i> Light</button><button class="theme-opt" data-theme="dark" onclick="selectTheme('dark')"><i class="fa-solid fa-moon"></i> Dark</button><button class="theme-opt" data-theme="auto" onclick="selectTheme('auto')"><i class="fa-solid fa-circle-half-stroke"></i> Auto</button></div></div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+    </main>
+</div>
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- Create/Edit Campaign Modal -->
+<div class="modal-overlay hidden" id="campaign-modal-overlay">
+  <div class="modal"><div class="modal-header"><h3 class="modal-title" id="campaign-modal-title">New Campaign</h3><button class="modal-close" onclick="closeCampaignModal()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body"><input type="hidden" id="camp-id" /><div class="modal-grid">
+    <div class="modal-field col-span-2"><label class="modal-label">Name *</label><input type="text" class="form-input" id="camp-name" /></div>
+    <div class="modal-field"><label class="modal-label">Type *</label><select class="form-select" id="camp-type"><option value="">Select…</option><option>Email</option><option>SMS</option><option>Push Notification</option><option>Social</option><option>Multi-channel</option></select></div>
+    <div class="modal-field"><label class="modal-label">Status</label><select class="form-select" id="camp-status"><option>Draft</option><option>Scheduled</option><option>Active</option><option>Paused</option><option>Completed</option><option>Archived</option></select></div>
+    <div class="modal-field"><label class="modal-label">Start Date</label><input type="date" class="form-input" id="camp-start-date" /></div>
+    <div class="modal-field"><label class="modal-label">End Date</label><input type="date" class="form-input" id="camp-end-date" /></div>
+    <div class="modal-field col-span-2"><label class="modal-label">Folder</label><select class="form-select" id="camp-folder"><option value="">Unassigned</option></select></div>
+  </div></div>
+  <div class="modal-footer"><button class="btn-secondary" onclick="closeCampaignModal()">Cancel</button><button class="btn-primary" onclick="saveCampaign()"><i class="fa-solid fa-check mr-1.5"></i>Save</button></div></div>
+</div>
+
+<!-- Create/Edit Segment Modal -->
+<div class="modal-overlay hidden" id="segment-modal-overlay">
+  <div class="modal"><div class="modal-header"><h3 class="modal-title" id="segment-modal-title">New Segment</h3><button class="modal-close" onclick="closeSegmentModal()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body"><input type="hidden" id="seg-id" /><div class="modal-grid">
+    <div class="modal-field col-span-2"><label class="modal-label">Name *</label><input type="text" class="form-input" id="seg-name" /></div>
+    <div class="modal-field"><label class="modal-label">Type *</label><select class="form-select" id="seg-type"><option value="">Select…</option><option>Static</option><option>Dynamic</option><option>Behavioral</option><option>Predictive</option><option>Lookalike</option></select></div>
+    <div class="modal-field"><label class="modal-label">Est. Count</label><input type="number" class="form-input" id="seg-count" /></div>
+    <div class="modal-field col-span-2"><label class="modal-label">Filter Criteria</label><input type="text" class="form-input font-mono text-sm" id="seg-filter" /></div>
+    <div class="modal-field col-span-2"><label class="modal-label">Folder</label><select class="form-select" id="seg-folder"><option value="">Unassigned</option></select></div>
+  </div></div>
+  <div class="modal-footer"><button class="btn-secondary" onclick="closeSegmentModal()">Cancel</button><button class="btn-primary" onclick="saveSegment()"><i class="fa-solid fa-check mr-1.5"></i>Save</button></div></div>
+</div>
+
+<!-- Create Email Template Modal -->
+<div class="modal-overlay hidden" id="et-modal-overlay">
+  <div class="modal modal-lg"><div class="modal-header"><h3 class="modal-title" id="et-modal-title">New Template</h3><button class="modal-close" onclick="closeEtModal()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body"><input type="hidden" id="et-id" /><div class="modal-grid">
+    <div class="modal-field col-span-2"><label class="modal-label">Name *</label><input type="text" class="form-input" id="et-name" /></div>
+    <div class="modal-field col-span-2"><label class="modal-label">Subject *</label><input type="text" class="form-input" id="et-subject" /></div>
+    <div class="modal-field col-span-2"><label class="modal-label">Category</label><select class="form-select" id="et-category"><option value="">—</option><option>Promotional</option><option>Transactional</option><option>Newsletter</option><option>Welcome</option><option>Drip</option><option>Notification</option><option>Reminder</option><option>Survey</option><option>Re-engagement</option><option>Announcement</option></select></div>
+    <div class="modal-field col-span-2"><label class="modal-label">HTML Body</label><textarea class="form-textarea" id="et-body" rows="7"></textarea></div>
+  </div></div>
+  <div class="modal-footer"><button class="btn-secondary" onclick="closeEtModal()">Cancel</button><button class="btn-primary" onclick="saveEt()"><i class="fa-solid fa-check mr-1.5"></i>Save</button></div></div>
+</div>
+
+<!-- Folder Modal -->
+<div class="modal-overlay hidden" id="folder-modal-overlay">
+  <div class="modal modal-sm"><div class="modal-header"><h3 class="modal-title" id="folder-modal-title">New Folder</h3><button class="modal-close" onclick="closeFolderModal()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body"><input type="hidden" id="folder-modal-type" /><input type="hidden" id="folder-modal-id" /><div class="modal-field"><label class="modal-label">Folder Name *</label><input type="text" class="form-input" id="folder-modal-name" /></div></div>
+  <div class="modal-footer"><button class="btn-secondary" onclick="closeFolderModal()">Cancel</button><button class="btn-primary" onclick="saveFolder()"><i class="fa-solid fa-check mr-1.5"></i>Save</button></div></div>
+</div>
+
+<!-- Move to Folder Modal -->
+<div class="modal-overlay hidden" id="move-modal-overlay">
+  <div class="modal modal-sm"><div class="modal-header"><h3 class="modal-title">Move to Folder</h3><button class="modal-close" onclick="closeMoveModal()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body"><input type="hidden" id="move-modal-type" /><div class="modal-field"><label class="modal-label">Destination Folder</label><select class="form-select" id="move-folder-select"><option value="">Unassigned</option></select></div></div>
+  <div class="modal-footer"><button class="btn-secondary" onclick="closeMoveModal()">Cancel</button><button class="btn-primary" onclick="executeMove()"><i class="fa-solid fa-folder-open mr-1.5"></i>Move</button></div></div>
+</div>
+
+<!-- Email Template Preview Modal -->
+<div class="modal-overlay hidden" id="et-preview-modal-overlay">
+  <div class="modal modal-preview">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title" id="et-preview-modal-name">Preview</h3>
+        <div style="font-size:12px;color:#94a3b8;margin-top:2px" id="et-preview-modal-subject"></div>
+      </div>
+      <button class="modal-close" onclick="closeEtPreviewModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <iframe id="et-preview-modal-frame" class="et-preview-modal-frame"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay hidden" id="confirm-modal-overlay">
+  <div class="modal modal-sm"><div class="modal-header"><h3 class="modal-title"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>Confirm</h3><button class="modal-close" onclick="closeConfirmModal()"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal-body"><p class="text-slate-600 text-sm" id="confirm-modal-msg"></p></div>
+  <div class="modal-footer"><button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button><button class="btn-danger-solid" id="confirm-modal-ok">Confirm</button></div></div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/common.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/campaign.js"></script>
+<script src="js/segment.js"></script>
+<script src="js/email-template.js"></script>
+<script src="js/settings.js"></script>
+</body>
+</html>
