@@ -1,7 +1,0 @@
-[
-  { "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "name": "Premium Users", "createDate": "2025-01-01T00:00:00Z", "createBy": "admin@acmecorp.com", "updatedDate": null, "updatedBy": null, "isDelete": false },
-  { "id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", "name": "New Users", "createDate": "2025-01-01T00:00:00Z", "createBy": "admin@acmecorp.com", "updatedDate": null, "updatedBy": null, "isDelete": false },
-  { "id": "cccccccc-cccc-cccc-cccc-cccccccccccc", "name": "Geographic", "createDate": "2025-02-01T00:00:00Z", "createBy": "sarah.johnson@acmecorp.com", "updatedDate": null, "updatedBy": null, "isDelete": false },
-  { "id": "dddddddd-dddd-dddd-dddd-dddddddddddd", "name": "Behavioral", "createDate": "2025-02-10T00:00:00Z", "createBy": "mark.davis@acmecorp.com", "updatedDate": null, "updatedBy": null, "isDelete": false },
-  { "id": "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee", "name": "Demographic", "createDate": "2025-03-01T00:00:00Z", "createBy": "admin@acmecorp.com", "updatedDate": null, "updatedBy": null, "isDelete": false }
-]

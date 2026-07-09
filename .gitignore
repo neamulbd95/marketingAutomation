@@ -1,5 +1,5 @@
 
-.MarketingAutomation.API/obj/*
+MarketingAutomation.API/obj/*
 .claude/*
-.MarketingAutomation.API/bin/*
+MarketingAutomation.API/bin/*
 .vscode/
